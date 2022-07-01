@@ -1,0 +1,112 @@
+* { margin: 0; padding: 0;} /*Reset*/
+
+
+/**********Formatting dropdown***********/
+
+/* .Select--multi .Select-value {
+    background-color: rgb(0, 28, 89);
+    border-color: #ffffff;
+    color: #FFF;
+} */
+.Select--multi{
+    color: rgb(13, 2, 112);
+}
+
+/********************************************************************* GENERAL FORMATTING ********************************************************************/
+/*Área que contempla menu lateral e a área de gráficos*/
+#main-area{
+    width: 98%;
+    margin: 0px auto;
+}
+
+/*Cabeçalho*/
+#header{
+    margin: 0px auto;
+    margin-top: 10px;
+    padding: 9px;
+    text-align: center;
+}
+
+/*Barra lateral*/
+#side-bar{
+    width: 22%;
+    padding: 0px 10px 10px 10px;
+    float: left;
+    margin-top: 10px;
+    border: 2px white solid;
+    height: 100%;
+}
+
+/* Page Label*/
+#label-area{
+    width: 77%;
+    float: right;
+    text-align: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border: 1px white solid;
+    background: rgb(191, 48, 0);
+}
+
+/*Área dos gráficos*/
+#plots-area{
+    width: 77%;
+    margin-top: 5px;
+    padding: 0px 10px 10px 10px;
+    border: 2px white solid;
+    height: 100%;
+    float: right;
+}
+
+#input-area{
+    padding: 10px;
+}
+
+#input-area .dropdown{
+    font-size: medium;
+    margin-bottom: 15px;
+}
+
+#input-area h6{
+    color: rgb(214, 214, 214);
+    text-align: left;
+    font-size:large;
+}
+
+#header h1{
+    color: #e3a700;
+    margin-bottom: -10px;
+}
+
+.clear{
+    clear: both;
+}
+
+/**************Plots***************/
+.plot-title{
+    text-align: center;
+    padding: 5px;
+    border: 1px solid white;
+    background:rgb(12, 58, 73);
+}
+
+.pie{
+    float: left;
+    width: 24%;
+    margin-top: 10px;
+    margin-right: 10px;
+    border: 1px solid white;
+}
+
+#bar{
+    float: left;
+    width: 75%;
+    margin-top: 10px;
+    border: 1px solid white;
+}
+
+#pareto{
+    border: 2px solid white;
+    margin-top: 10px;
+}
+
