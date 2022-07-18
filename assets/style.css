@@ -58,6 +58,16 @@
     float: right;
 }
 
+#info-area{
+    padding: 18px;
+    width: 77%;
+    border: 2px white solid;
+    height: 80px;
+    float: right;
+    text-align: center;
+    background: rgb(7, 99, 152);
+}
+
 #input-area{
     padding: 10px;
 }

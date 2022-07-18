@@ -10,6 +10,7 @@ app = JupyterDash(external_stylesheets=[dbc.themes.DARKLY], suppress_callback_ex
 
 # Data import
 dados = pd.read_csv("Python_DashBoard/data/data.txt", delimiter=';')
+dados['Ano'] = dados['Data'].apply(lambda x: datetime.strptime(x,'%d/%m/%Y').year)
 
 times = dados['Mandante'].str.lower().unique().tolist()
 estadios = dados['Arena'].str.lower().unique().tolist()
@@ -62,6 +63,12 @@ app.layout = html.Div(children=[
             ])
         ]),
 
+        html.Div(id='info-area', children=[
+            html.Div(
+                html.H3('Os gráficos aqui apresentados são referentes à primeira divisão')
+            )
+        ]),
+
         html.Div(className='clear'),
         html.Div(id='pareto', children=[
             html.Div(className='plot-title', children=['Distribuição da quantidade de gols por time e condição de jogo']),
@@ -98,22 +105,21 @@ def insert_pie_chart(times, years):
 
 # Calling pareto plot
 @callback(Output('bar-chart', 'children'), Input('times', 'value'), Input('anos', 'value'))
-def insert_pareto_chart(times,years):
-
-    selected_years = list(range(years[0],years[-1]+1,1))
+def insert_bar_chart(times,years):
 
     if times is not None:
-        dados_pareto = pd.concat([dados[dados['Mandante'].apply(lambda x: x.lower()).isin(times)],dados[dados['Visitante'].apply(lambda x: x.lower()).isin(times)]])
+        times_list = times
     else:
-        dados_pareto = dados
+        times_list = dados['Mandante'].str.lower().unique().tolist()
     
-    dados_pareto['Ano'] = dados_pareto['Data'].apply(lambda x: datetime.strptime(x,'%d/%m/%Y').year)
+    selected_years = list(range(years[0],years[-1]+1,1))
+
     soma = []; condicao = []; anos =[]
     for ano in selected_years:
-        soma.append(dados_pareto[dados_pareto['Ano'] == ano]['Mandante Placar'].sum())
+        soma.append(dados.query('Mandante.str.lower().isin({}) & Ano == {}'.format(times_list,ano))['Mandante Placar'].sum())
         condicao.append('mandante')
         anos.append(ano)
-        soma.append(dados_pareto[dados_pareto['Ano'] == ano]['Visitante Placar'].sum())
+        soma.append(dados.query('Visitante.str.lower().isin({}) & Ano == {}'.format(times_list,ano))['Visitante Placar'].sum())
         condicao.append('visitante')
         anos.append(ano)
 
@@ -124,39 +130,30 @@ def insert_pareto_chart(times,years):
     return dcc.Graph(figure=fig)
 
 # Calling pareto plot
-@callback(Output('pareto-chart', 'children'), Input('times', 'value'), Input('anos', 'value'))
-def insert_pareto_chart(times,years):
+@callback(Output('pareto-chart', 'children'), Input('anos', 'value'))
+def insert_pareto_chart(years):
 
-    if times is None:
+    # Filtrando pelo ano
+    selected_years = list(range(years[0],years[-1]+1,1))
+    #dados_ano = dados[dados['Data'].apply(lambda x: datetime.strptime(x,'%d/%m/%Y').year in selected_years)]
+    
+    soma = []; condicao = []; time_list =[]
+    for time in dados['Mandante'].str.lower().unique().tolist():
+        soma.append(dados.query('Ano.isin({}) & Mandante.str.lower() == "{}"'.format(selected_years,time))['Mandante Placar'].sum())
+        condicao.append('mandante')
+        time_list.append(time)
+        soma.append(dados.query('Ano.isin({}) & Visitante.str.lower() == "{}"'.format(selected_years,time))['Visitante Placar'].sum())
+        condicao.append('visitante')
+        time_list.append(time)
+    
+    df = pd.DataFrame(data=zip(time_list,condicao,soma), columns=['Time', 'Condição', 'Gols'])
 
-        # Filtrando pelo ano
-        selected_years = list(range(years[0],years[-1]+1,1))
-        dados_ano = dados[dados['Data'].apply(lambda x: datetime.strptime(x,'%d/%m/%Y').year in selected_years)]
+    df.sort_values('Gols', ascending=False, inplace=True)
+    df['cumperc'] = df['Gols'].cumsum()/df['Gols'].sum()
 
-        # Filtrando pelo time
-        if times is not None:
-            dados_ano_time = pd.concat([dados_ano[dados_ano['Mandante'].apply(lambda x: x.lower()).isin(times)],\
-                dados_ano[dados_ano['Visitante'].apply(lambda x: x.lower()).isin(times)]])
-        else:
-            dados_ano_time = dados_ano
-        
-        soma = []; condicao = []; time_list =[]
-        for time in dados_ano_time['Mandante'].str.lower().unique().tolist():
-            soma.append(dados_ano_time[dados_ano_time['Mandante'].str.lower() == time]['Mandante Placar'].sum())
-            condicao.append('mandante')
-            time_list.append(time)
-            soma.append(dados_ano_time[dados_ano_time['Visitante'].str.lower() == time]['Visitante Placar'].sum())
-            condicao.append('visitante')
-            time_list.append(time)
-        
-        df = pd.DataFrame(data=zip(time_list,condicao,soma), columns=['Time', 'Condição', 'Gols'])
+    fig =px.bar(df, x='Time', y='Gols', color="Condição",template='plotly_dark',barmode="group")
 
-        df.sort_values('Gols', ascending=False, inplace=True)
-        df['cumperc'] = df['Gols'].cumsum()/df['Gols'].sum()
-
-        fig =px.bar(df, x='Time', y='Gols', color="Condição",template='plotly_dark',barmode="group")
-
-        return dcc.Graph(figure=fig)
+    return dcc.Graph(figure=fig)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
